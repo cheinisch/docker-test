@@ -1,14 +1,14 @@
-name: Build and Push Docker Test Images
+name: Build and Push Docker Test Image
 
 on:
   push:
     tags:
-      - 'v*'   # läuft bei Tags wie v1.0.0
+      - 'v*'    # läuft bei Tags wie v1.0.0
   workflow_dispatch:    # manueller Start möglich
 
 jobs:
-  build-and-push-php:
-    name: Build & Push PHP-FPM Image
+  build-and-push:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -28,42 +28,11 @@ jobs:
     - name: Login to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Build & Push PHP-FPM Image
+    - name: Build & Push Docker Image
       run: |
-        docker build -f docker/Dockerfile -t cheinisch/docker-test:${{ env.VERSION }} .
+        docker build -f Dockerfile -t cheinisch/docker-test:${{ env.VERSION }} .
         docker push cheinisch/docker-test:${{ env.VERSION }}
         if [[ "${{ env.VERSION }}" != "latest" ]]; then
           docker tag cheinisch/docker-test:${{ env.VERSION }} cheinisch/docker-test:latest
           docker push cheinisch/docker-test:latest
-        fi
-
-  build-and-push-nginx:
-    name: Build & Push NGINX Image
-    runs-on: ubuntu-latest
-    needs: build-and-push-php   # erst nach PHP-FPM fertigstellen
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Extract version
-      id: version
-      run: |
-        if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-          VERSION="${GITHUB_REF#refs/tags/v}"
-        else
-          VERSION="latest"
-        fi
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-    - name: Login to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-    - name: Build & Push NGINX Image
-      run: |
-        docker build -f docker/nginx.Dockerfile -t cheinisch/docker-test-nginx:${{ env.VERSION }} .
-        docker push cheinisch/docker-test-nginx:${{ env.VERSION }}
-        if [[ "${{ env.VERSION }}" != "latest" ]]; then
-          docker tag cheinisch/docker-test-nginx:${{ env.VERSION }} cheinisch/docker-test-nginx:latest
-          docker push cheinisch/docker-test-nginx:latest
         fi
