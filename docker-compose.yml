@@ -1,25 +1,10 @@
-services:
-  php:
-    image: cheinisch/docker-test:latest
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    volumes:
-      - .:/var/www/html
-    expose:
-      - "9000"
+version: "3.9"
 
-  nginx:
-    image: cheinisch/docker-test-nginx:latest
-    build:
-      context: .
-      dockerfile: docker/nginx.Dockerfile
+services:
+  app:
+    image: cheinisch/docker-test
     ports:
       - "8080:80"
-    depends_on:
-      - php
     volumes:
-      - .:/var/www/html
-
-volumes:
-  userdata_volume:
+      - ./app:/var/www/html
+    restart: unless-stopped
