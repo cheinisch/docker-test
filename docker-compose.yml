@@ -1,0 +1,25 @@
+services:
+  php:
+    image: cheinisch/docker-test:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/var/www/html
+    expose:
+      - "9000"
+
+  nginx:
+    image: cheinisch/docker-test-nginx:latest
+    build:
+      context: .
+      dockerfile: docker/nginx.Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+    volumes:
+      - .:/var/www/html
+
+volumes:
+  userdata_volume:
